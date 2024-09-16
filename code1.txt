@@ -75,13 +75,13 @@ ylim([-max(abs(deflections(:))) max(abs(deflections(:)))]);
 h = plot(x, deflections(:, 1), '-ob', 'LineWidth', 2, 'MarkerSize', 6); 
 
 
-textPositionX = L * 0.5; % X-coordinate for the text (center of the plot)
-textPositionY = min(ylim) * -1 % Y-coordinate for the text (just below the plot)
+textPositionX = L * 0.5; 
+textPositionY = min(ylim) * -1 
 text(textPositionX, textPositionY, 'Sim by Sarthak', 'FontSize', 12, 'HorizontalAlignment', 'center');
 
 
 videoObj = VideoWriter(videoFilename, 'MPEG-4');
-videoObj.FrameRate = 2; % Frames per second
+videoObj.FrameRate = 2; 
 open(videoObj);
 
 
@@ -101,9 +101,7 @@ for load_pos = 1:num_nodes
 end
 
 hold off;
-close(videoObj); % Close the video file and finalize the video
+close(videoObj); 
 
 
-hold off;
-close(videoObj);
 
