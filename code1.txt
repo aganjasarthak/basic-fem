@@ -1,0 +1,109 @@
+x_nodes = linspace(0, L, n+1);
+
+
+K_elem = (e*secondmoment)/(element^3) * [12 6*dx -12 6*dx;
+                       6*dx 4*dx^2 -6*dx 2*dx^2;
+                       -12 -6*dx 12 -6*dx;
+                       6*dx 2*dx^2 -6*dx 4*dx^2];
+                   
+
+K_global = zeros(2*(n+1)); 
+
+for i = 1:n
+    K_global(2*i-1:2*i+2, 2*i-1:2*i+2) = K_global(2*i-1:2*i+2, 2*i-1:2*i+2) + K_elem;
+        
+end
+
+
+deflections = zeros(n+1, n+1); 
+num_nodes = n+1;
+
+for load_pos = 1:num_nodes
+    
+    F_global = zeros(2*num_nodes, 1);
+    
+   
+    F_global(2*load_pos-1) = -P; 
+    
+    
+    idx = [1, 2, 2*num_nodes-1, 2*num_nodes];
+    K_reduced = K_global;
+    K_reduced(idx, :) = [];
+    K_reduced(:, idx) = [];
+    
+    F_reduced = F_global;
+    F_reduced(idx) = [];
+    
+   
+    delta_reduced = K_reduced \ F_reduced;
+    
+    
+    delta_full = zeros(2*num_nodes, 1);
+    delta_full(setdiff(1:2*num_nodes, idx)) = delta_reduced;
+    
+    
+    deflections(:, load_pos) = delta_full(1:2:end);
+end
+
+
+
+
+outputDir = 'C:\Users\User\Downloads';
+
+
+if ~exist(outputDir, 'dir')
+    mkdir(outputDir);
+end
+
+
+videoFilename = fullfile(outputDir, 'beam_deflection_animation.mp4');
+
+
+figure;
+grid on;
+title('Beam Deflection under Moving Load');
+xlabel('Position along beam (m)');
+ylabel('Deflection (m)');
+hold on;
+
+
+x = linspace(0, L, num_nodes); 
+xlim([0 L]); 
+ylim([-max(abs(deflections(:))) max(abs(deflections(:)))]);
+
+
+h = plot(x, deflections(:, 1), '-ob', 'LineWidth', 2, 'MarkerSize', 6); 
+
+
+textPositionX = L * 0.5; % X-coordinate for the text (center of the plot)
+textPositionY = min(ylim) * -1 % Y-coordinate for the text (just below the plot)
+text(textPositionX, textPositionY, 'Sim by Sarthak', 'FontSize', 12, 'HorizontalAlignment', 'center');
+
+
+videoObj = VideoWriter(videoFilename, 'MPEG-4');
+videoObj.FrameRate = 2; % Frames per second
+open(videoObj);
+
+
+for load_pos = 1:num_nodes
+    
+    set(h, 'YData', deflections(:, load_pos));
+    
+    
+    title(sprintf('Beam Deflection (Load at x = %.2f m)', x(load_pos)));
+    
+    
+    frame = getframe(gcf);
+    writeVideo(videoObj, frame);
+    
+    
+    pause(1); 
+end
+
+hold off;
+close(videoObj); % Close the video file and finalize the video
+
+
+hold off;
+close(videoObj);
+
